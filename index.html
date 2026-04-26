@@ -1,1 +1,206 @@
-index.html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robloxia Dashboard - Senior Dev</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #191b1d;
+            --sidebar-color: #212529;
+            --accent: #00b2ff;
+            --robux-gold: #ffd700;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Menú Lateral */
+        nav {
+            width: 250px;
+            background-color: var(--sidebar-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 30px; color: var(--accent); }
+
+        .nav-item {
+            padding: 12px;
+            margin: 5px 0;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-item:hover { background: #3a3f44; }
+        .btn-create { background: #0084ff; font-weight: bold; text-align: center; margin-top: auto; }
+
+        /* Contenido Principal */
+        main {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2a2e33;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .robux-counter {
+            color: var(--robux-gold);
+            font-weight: bold;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Dashboard Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: #2a2e33;
+            padding: 20px;
+            border-radius: 15px;
+            min-height: 200px;
+        }
+
+        #avatar-container {
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 10px;
+        }
+
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .item {
+            background: #3a3f44;
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">ROBLOXIA</div>
+    <a href="#" class="nav-item">Perfil</a>
+    <a href="#" class="nav-item">Tienda de Skins</a>
+    <a href="#" class="nav-item">Mis Juegos</a>
+    <a href="https://TU-SEGUNDA-WEB.vercel.app" class="nav-item btn-create">CREAR (Studio)</a>
+</nav>
+
+<main>
+    <div class="header">
+        <div id="user-info">Bienvenido, <span id="username">Usuario Gatico</span></div>
+        <div class="robux-counter">
+            💰 <span id="balance">0</span> Robux
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h3>Mi Avatar 3D</h3>
+            <div id="avatar-container"></div>
+        </div>
+
+        <div class="card">
+            <h3>Tienda Rápida</h3>
+            <div class="store-grid">
+                <div class="item" onclick="buyItem(50)">Capa (50)</div>
+                <div class="item" onclick="buyItem(100)">Espada (100)</div>
+                <div class="item" onclick="buyItem(200)">Casco (200)</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Lógica de Economía
+    let robux = parseInt(localStorage.getItem('robux')) || 0;
+    const balanceEl = document.getElementById('balance');
+
+    function updateDisplay() {
+        balanceEl.innerText = robux;
+        localStorage.setItem('robux', robux);
+    }
+
+    // 1. Ganar Robux por tiempo (10 Robux cada minuto)
+    setInterval(() => {
+        robux += 10;
+        updateDisplay();
+        console.log("Ganaste 10 Robux por jugar!");
+    }, 60000); // 60000ms = 1 minuto
+
+    // 2. Función para comprar
+    function buyItem(cost) {
+        if (robux >= cost) {
+            robux -= cost;
+            updateDisplay();
+            alert("¡Objeto equipado!");
+        } else {
+            alert("No tienes suficientes Robux.");
+        }
+    }
+
+    // Inicializar Three.js (Avatar simple)
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const container = document.getElementById('avatar-container');
+    
+    renderer.setSize(container.offsetWidth, 300);
+    container.appendChild(renderer.domElement);
+
+    const geometry = new THREE.BoxGeometry(1, 2, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+    const dummy = new THREE.Mesh(geometry, material);
+    scene.add(dummy);
+
+    camera.position.z = 5;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        dummy.rotation.y += 0.01;
+        renderer.render(scene, camera);
+    }
+    animate();
+    updateDisplay();
+</script>
+
+</body>
+  </html>
+  
