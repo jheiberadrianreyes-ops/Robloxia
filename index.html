@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robloxia - Dashboard Senior</title>
+    <title>Robloxia - Dashboard v2.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -11,183 +11,243 @@
             --rbx-sidebar: #212529;
             --rbx-blue: #0084ff;
             --rbx-success: #00b06f;
+            --rbx-card: #232527;
             --white: #ffffff;
+            --grey: #bdbebf;
         }
 
-        body, html {
-            margin: 0; padding: 0;
-            font-family: 'HCo Gotham SSm', Helvetica, Arial, sans-serif;
-            background-color: var(--rbx-bg);
-            color: var(--white);
-            height: 100%; overflow: hidden;
-        }
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', helvetica, sans-serif; background-color: var(--rbx-bg); color: var(--white); height: 100vh; overflow: hidden; }
 
-        /* LOGIN */
-        #auth-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.rbxcdn.com/f3000693a18a99477d94944f2d7d8e8b.jpg');
-            background-size: cover; display: flex; justify-content: center; align-items: center; z-index: 1000;
-        }
+        /* Estilos Globales */
+        .btn { border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-blue { background-color: var(--rbx-blue); color: white; }
+        .btn-success { background-color: var(--rbx-success); color: white; }
+        .card { background: var(--rbx-card); padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; }
 
-        .auth-card { background: white; color: #444; padding: 30px; border-radius: 8px; width: 90%; max-width: 400px; text-align: center; }
-        .auth-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn-rbx { background-color: var(--rbx-success); color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        /* Layout */
+        #app-layout { display: grid; grid-template-columns: 220px 1fr; height: 100vh; }
 
-        /* DASHBOARD */
-        #main-dashboard { display: none; height: 100vh; grid-template-columns: 200px 1fr; }
-        nav { background-color: var(--rbx-sidebar); padding: 20px 10px; border-right: 1px solid #333; }
-        .nav-link { display: block; color: #bdbebf; text-decoration: none; padding: 12px; margin: 5px 0; border-radius: 5px; font-size: 0.9rem; }
-        .nav-link:hover, .active { background-color: rgba(255,255,255,0.1); color: white; }
-        .btn-studio { background-color: var(--rbx-blue); color: white; text-align: center; font-weight: bold; margin-top: 20px; }
+        /* Sidebar */
+        nav { background-color: var(--rbx-sidebar); padding: 20px 10px; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        .nav-link { display: block; color: var(--grey); text-decoration: none; padding: 12px; margin: 2px 0; border-radius: 5px; font-size: 0.95rem; cursor: pointer; }
+        .nav-link:hover, .nav-link.active { background-color: rgba(255,255,255,0.08); color: white; }
+        .btn-studio { margin-top: auto; text-align: center; }
 
-        main { padding: 20px; overflow-y: auto; background-color: #121415; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #333; margin-bottom: 20px; }
-        .user-pill { font-size: 1.5rem; font-weight: bold; }
-        .robux-display { color: #ffd700; font-weight: bold; font-size: 1.2rem; }
+        /* Main Content */
+        main { padding: 25px; overflow-y: auto; background-color: #121415; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 25px; }
+        .robux-display { color: #ffd700; font-weight: bold; font-size: 1.3rem; display: flex; align-items: center; gap: 8px; }
 
-        /* GAME SIMULATION MODAL */
-        #game-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 2000; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .playing-text { color: #00ff00; font-family: monospace; font-size: 1.5rem; margin-bottom: 20px; }
+        /* Secciones */
+        .section { display: none; }
+        .section.active { display: block; }
 
-        .content-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
-        .avatar-box { background: #111; border-radius: 10px; height: 400px; border: 1px solid #333; }
-        .game-card { background: #232527; padding: 15px; border-radius: 8px; border: 1px solid #444; cursor: pointer; transition: 0.2s; }
-        .game-card:hover { transform: scale(1.02); background: #2d3033; }
+        /* Tienda */
+        .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
+        .store-item { background: #1a1c1e; border: 1px solid #444; border-radius: 8px; padding: 10px; text-align: center; transition: 0.2s; }
+        .store-item:hover { border-color: var(--rbx-blue); transform: translateY(-3px); }
+        .item-icon { height: 70px; background: #333; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+        .item-name { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block; height: 32px; overflow: hidden; }
+        .item-price { color: #ffd700; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; }
+        .btn-buy { width: 100%; padding: 6px; font-size: 0.8rem; }
+
+        /* Avatar */
+        .avatar-container { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
+        #avatar-viewer { background: #000; border-radius: 10px; height: 500px; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-<div id="auth-screen">
-    <div class="auth-card">
-        <h2>Bienvenido a Robloxia</h2>
-        <input type="text" id="reg-username" placeholder="Nombre de usuario">
-        <button class="btn-rbx" onclick="handleLogin()">Entrar</button>
-    </div>
-</div>
-
-<div id="game-overlay">
-    <div class="playing-text">JUGANDO: "OBBY DE PRUEBA"</div>
-    <p>Ganando 10 Robux cada minuto...</p>
-    <button class="btn-rbx" style="width: 200px; background: #ff4444;" onclick="stopPlaying()">Salir del Juego</button>
-</div>
-
-<div id="main-dashboard">
+<div id="app-layout">
     <nav>
-        <div style="font-weight: bold; font-size: 1.2rem; margin-bottom: 20px; padding-left: 10px; color: var(--rbx-blue);">ROBLOXIA</div>
-        <a href="#" class="nav-link active">Inicio</a>
-        <a href="#" class="nav-link">Perfil</a>
-        <a href="#" class="nav-link">Tienda</a>
-        <a href="#" class="nav-link btn-studio" id="studio-btn">CREAR (Studio)</a>
+        <div style="font-weight: bold; font-size: 1.3rem; margin-bottom: 25px; padding-left: 10px; color: white;">ROBLOXIA</div>
+        <div class="nav-link active" onclick="showSection('inicio')">🏠 Inicio</div>
+        <div class="nav-link" onclick="showSection('perfil')">👤 Perfil</div>
+        <div class="nav-link" onclick="showSection('tienda')">🛒 Tienda</div>
+        <div class="nav-link" onclick="showSection('avatar')">👕 Avatar</div>
+        <a href="#" class="btn btn-blue btn-studio">CREAR (Studio)</a>
     </nav>
 
     <main>
         <div class="top-bar">
-            <div class="user-pill">Hola, <span id="display-name">Invitado</span>!</div>
-            <div class="robux-display">💰 <span id="robux-val">0</span> Robux</div>
+            <div style="font-size: 1.6rem; font-weight: bold;">Hola, <span style="color: var(--rbx-blue);">jheiber</span>!</div>
+            <div class="robux-display">
+                💰 <span id="robux-val">0</span>
+                <button class="btn btn-success" style="padding: 5px 10px; font-size: 0.7rem; margin-left: 10px;" onclick="addTestRobux()">+100 Test</button>
+            </div>
         </div>
 
-        <div class="content-grid">
-            <div>
-                <h3>Juegos Recomendados</h3>
-                <div class="game-card" onclick="startPlaying()">
-                    <div style="height: 120px; background: #333; border-radius: 5px; margin-bottom: 10px;"></div>
-                    <strong>Obby de la Jungla</strong>
-                    <p style="font-size: 0.8rem; color: #888;">Creador: RobloxiaDev</p>
-                </div>
-            </div>
-            
-            <div class="sidebar-stats">
-                <h4>Tu Avatar</h4>
-                <div class="avatar-box" id="avatar-3d"></div>
+        <div id="sec-inicio" class="section active">
+            <div class="card">
+                <h3>Bienvenido a tu Panel Senior</h3>
+                <p>Esta es tu base de operaciones. Desde aquí puedes gestionar tu perfil, visitar la tienda con 50 ítems nuevos, configurar tu avatar (¡ya tiene piernas! xd) o abrir el Studio para crear juegos.</p>
+                <p style="color: var(--grey); font-size: 0.9rem;">Empiezas con 0 Robux. Usa el botón verde de arriba para añadir fondos de prueba y comprar en la tienda.</p>
             </div>
         </div>
+
+        <div id="sec-perfil" class="section">
+            <div class="card">
+                <h3>Perfil de jheiber</h3>
+                <p><strong>Estado:</strong> Desarrollador Senior</p>
+                <p><strong>Miembro desde:</strong> Hoy</p>
+                <p><strong>Juegos Creados:</strong> 0 (Abre el Studio para empezar)</p>
+            </div>
+        </div>
+
+        <div id="sec-tienda" class="section">
+            <h3>Tienda de Objetos (50 novedades)</h3>
+            <div class="store-grid" id="store-content">
+                </div>
+        </div>
+
+        <div id="sec-avatar" class="section">
+            <div class="avatar-container">
+                <div class="card" id="avatar-viewer">
+                    </div>
+                <div class="card">
+                    <h4>Objetos Equipados</h4>
+                    <p style="color: #888; font-size: 0.9rem;">Actualmente llevas el aspecto por defecto.</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 </div>
 
 <script>
-    let robux = parseInt(localStorage.getItem('robux')) || 0;
-    let isPlaying = false;
-    let gameInterval;
+    // --- ECONOMÍA Y ESTADO ---
+    let robux = parseInt(localStorage.getItem('robux')) || 0; // Empieza en 0 si no hay save
+    updateRobuxUI();
 
     function updateRobuxUI() {
         document.getElementById('robux-val').innerText = robux;
         localStorage.setItem('robux', robux);
     }
 
-    function handleLogin() {
-        const user = document.getElementById('reg-username').value;
-        if(user.length < 3) return alert("Nombre muy corto");
-        document.getElementById('display-name').innerText = user;
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('main-dashboard').style.display = 'grid';
+    function addTestRobux() {
+        robux += 100;
         updateRobuxUI();
-        initThreeJS();
+        alert("¡+100 Robux de prueba añadidos!");
     }
 
-    // --- LÓGICA DE ECONOMÍA CORREGIDA ---
-    function startPlaying() {
-        isPlaying = true;
-        document.getElementById('game-overlay').style.display = 'flex';
+    // --- GESTIÓN DE PESTAÑAS ---
+    function showSection(sectionName) {
+        // Ocultar todas las secciones
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(s => s.classList.remove('active'));
         
-        // Empieza a ganar Robux SOLO mientras juega
-        gameInterval = setInterval(() => {
-            if(isPlaying) {
-                robux += 10;
-                updateRobuxUI();
-                console.log("+10 Robux ganados por tiempo de juego");
-            }
-        }, 60000); 
+        // Desactivar todos los links
+        const links = document.querySelectorAll('.nav-link');
+        links.forEach(l => l.classList.remove('active'));
+
+        // Activar la seleccionada
+        document.getElementById('sec-' + sectionName).classList.add('active');
+        event.currentTarget.classList.add('active');
+
+        // Reiniciar 3D si entramos en Avatar
+        if(sectionName === 'avatar') {
+            initThreeJSAvatar();
+        }
     }
 
-    function stopPlaying() {
-        isPlaying = false;
-        clearInterval(gameInterval);
-        document.getElementById('game-overlay').style.display = 'none';
-        alert("Has salido del juego. Proceso de ganancias detenido.");
+    // --- GENERACIÓN DE TIENDA (50 Ítems) ---
+    const itemNames = ["Gorra", "Espada", "Alas", "Mochila", "Casco", "Capa", "Máscara", "Hacha", "Gafas", "Auriculares"];
+    const itemEmojis = ["🧢", "⚔️", "💸", "🎒", "🪖", "🧥", "😷", "🪓", "🕶️", "🎧"];
+    const storeContent = document.getElementById('store-content');
+
+    for (let i = 1; i <= 50; i++) {
+        const randomType = Math.floor(Math.random() * itemNames.length);
+        const name = `${itemNames[randomType]} de Poder #${i}`;
+        const emoji = itemEmojis[randomType];
+        // Precio Random: Mínimo 7, Máximo 1000
+        const price = Math.floor(Math.random() * (1000 - 7 + 1)) + 7;
+
+        const itemHTML = `
+            <div class="store-item">
+                <div class="item-icon">${emoji}</div>
+                <span class="item-name">${name}</span>
+                <div class="item-price">💰 ${price}</div>
+                <button class="btn btn-blue btn-buy" onclick="buyItem('${name}', ${price})">Comprar</button>
+            </div>
+        `;
+        storeContent.innerHTML += itemHTML;
     }
 
-    // Lógica para cuando otros "juegan" tu juego (Simulación de ganancias de creador)
-    function simulateExternalVisits() {
-        // Si el usuario "crea" algo, simulamos que recibe visitas cada cierto tiempo
-        setInterval(() => {
-            robux += 5; // Ganancia pasiva por ser dueño
+    function buyItem(name, price) {
+        if (robux >= price) {
+            robux -= price;
             updateRobuxUI();
-        }, 120000); // Cada 2 minutos
+            alert(`¡Has comprado y equipado: ${name} por ${price} Robux!`);
+        } else {
+            alert(`No tienes suficientes Robux para comprar ${name}. Necesitas ${price} y tienes ${robux}.`);
+        }
     }
 
-    // Avatar 3D
-    function initThreeJS() {
-        const container = document.getElementById('avatar-3d');
+    // --- MOTOR 3D: MUÑECO CON PIERNAS (Three.js) ---
+    let activeRenderer;
+
+    function initThreeJSAvatar() {
+        const container = document.getElementById('avatar-viewer');
+        if(container.children.length > 0) return; // Ya inicializado
+
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / 400, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / 500, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(container.offsetWidth, 400);
+        
+        renderer.setSize(container.offsetWidth, 500);
         container.appendChild(renderer.domElement);
 
-        const group = new THREE.Group();
-        const mat = new THREE.MeshStandardMaterial({color: 0x555555});
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), new THREE.MeshStandardMaterial({color: 0xffdbac}));
-        head.position.y = 1.2;
-        const body = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 0.6), mat);
-        group.add(head, body);
-        
-        scene.add(group, new THREE.AmbientLight(0xffffff, 0.5));
+        // Personaje Completo (Bloques estilo R6)
+        const playerGroup = new THREE.Group();
+        const skinMat = new THREE.MeshStandardMaterial({color: 0xffdbac}); // Piel
+        const shirtMat = new THREE.MeshStandardMaterial({color: 0x333333}); // Camisa Gris
+        const pantsMat = new THREE.MeshStandardMaterial({color: 0x111111}); // Pantalón Negro
+
+        // Cabeza
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), skinMat);
+        head.position.y = 1.45;
+        playerGroup.add(head);
+
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.0, 0.8), shirtMat);
+        torso.position.y = 0;
+        playerGroup.add(torso);
+
+        // Brazos
+        const armL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 2.0, 0.7), skinMat);
+        armL.position.set(-1.2, 0, 0);
+        playerGroup.add(armL);
+        const armR = armL.clone();
+        armR.position.x = 1.2;
+        playerGroup.add(armR);
+
+        // PIERNAS (¡Ya están aquí xd!)
+        const legL = new THREE.Mesh(new THREE.BoxGeometry(0.75, 2.0, 0.75), pantsMat);
+        legL.position.set(-0.42, -2.0, 0); // Separadas y abajo
+        playerGroup.add(legL);
+        const legR = legL.clone();
+        legR.position.x = 0.42;
+        playerGroup.add(legR);
+
+        scene.add(playerGroup);
+
+        // Iluminación
         const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(2, 2, 5);
+        light.position.set(5, 5, 10);
         scene.add(light);
-        camera.position.z = 5;
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+        camera.position.set(0, 0, 8); // Cámara más lejos para ver las piernas
 
         function animate() {
             requestAnimationFrame(animate);
-            group.rotation.y += 0.02;
+            playerGroup.rotation.y += 0.015; // Gira solo
             renderer.render(scene, camera);
         }
         animate();
     }
 </script>
+
 </body>
-                                                                                                                                        </html>
-                        
+    </html>
+    
